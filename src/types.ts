@@ -62,6 +62,8 @@ export interface TestStats {
   wpmHistory: WpmPoint[];
   completedWords: number;
   totalWords: number;
+  peakWpm: number;
+  errorKeys: Record<string, number>;
 }
 
 export interface Theme {

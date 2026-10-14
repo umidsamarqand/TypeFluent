@@ -7,7 +7,7 @@ import {
   TestStats, 
   StoredResult 
 } from './types';
-import { THEMES, getTheme } from './utils/themes';
+import { MIDNIGHT_NAVY_THEME } from './utils/themes';
 import { ARTICLES_DATABASE, getRandomArticle, getArticlesByCategory } from './data/articles';
 import { Header } from './components/Header';
 import { TestConfigBar } from './components/TestConfigBar';
@@ -17,16 +17,12 @@ import { ResultScreen } from './components/ResultScreen';
 import { CustomTextModal } from './components/CustomTextModal';
 import { HistoryModal } from './components/HistoryModal';
 
-const STORAGE_THEME_KEY = 'articletype_theme_id';
 const STORAGE_CONFIG_KEY = 'articletype_config';
 const STORAGE_HISTORY_KEY = 'articletype_history';
 
 export default function App() {
-  // Theme state
-  const [currentTheme, setCurrentTheme] = useState<Theme>(() => {
-    const saved = localStorage.getItem(STORAGE_THEME_KEY);
-    return saved ? getTheme(saved) : THEMES[0];
-  });
+  // Midnight Navy & White Theme (Exclusive)
+  const currentTheme: Theme = MIDNIGHT_NAVY_THEME;
 
   // Test configuration
   const [config, setConfig] = useState<TestConfig>(() => {
@@ -78,12 +74,6 @@ export default function App() {
     }
     return [];
   });
-
-  // Save theme
-  const handleSelectTheme = (theme: Theme) => {
-    setCurrentTheme(theme);
-    localStorage.setItem(STORAGE_THEME_KEY, theme.id);
-  };
 
   // Update config
   const handleUpdateConfig = (partial: Partial<TestConfig>) => {
@@ -179,13 +169,12 @@ export default function App() {
 
   return (
     <div 
-      className="min-h-screen flex flex-col transition-colors selection:bg-amber-400/20"
+      className="min-h-screen flex flex-col transition-colors selection:bg-sky-500/25"
       style={{ backgroundColor: currentTheme.bg, color: currentTheme.textMain }}
     >
       {/* 3-Zone Clean Header */}
       <Header
         currentTheme={currentTheme}
-        onSelectTheme={handleSelectTheme}
         soundType={config.soundType}
         onChangeSound={(soundType) => handleUpdateConfig({ soundType })}
         onOpenHistory={() => setIsHistoryModalOpen(true)}
@@ -245,17 +234,17 @@ export default function App() {
         }}
       >
         <div className="flex items-center gap-3">
-          <span><kbd className="px-1.5 py-0.5 rounded border text-[10px] bg-slate-100">Tab</kbd> restart</span>
+          <span><kbd className="px-1.5 py-0.5 rounded border text-[10px] bg-white/10 border-white/20 text-sky-300">Tab</kbd> restart</span>
           <span aria-hidden="true">·</span>
-          <span><kbd className="px-1.5 py-0.5 rounded border text-[10px] bg-slate-100">Space</kbd> submit word</span>
+          <span><kbd className="px-1.5 py-0.5 rounded border text-[10px] bg-white/10 border-white/20 text-sky-300">Space</kbd> submit word</span>
           <span aria-hidden="true">·</span>
-          <span><kbd className="px-1.5 py-0.5 rounded border text-[10px] bg-slate-100">Ctrl+Bksp</kbd> clear word</span>
+          <span><kbd className="px-1.5 py-0.5 rounded border text-[10px] bg-white/10 border-white/20 text-sky-300">Ctrl+Bksp</kbd> clear word</span>
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="font-medium text-slate-700">ArticleType</span>
+          <span className="font-semibold text-white">ArticleType</span>
           <span aria-hidden="true">·</span>
-          <span>Academic & Journalistic Typing Studio</span>
+          <span className="opacity-80">Midnight Navy & White Edition</span>
         </div>
       </footer>
 

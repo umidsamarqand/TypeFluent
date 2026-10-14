@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
 import { Theme, SoundType, ArticleCategory } from '../types';
-import { THEMES } from '../utils/themes';
-import { Volume2, VolumeX, Palette, History, FileText, Sparkles, BookOpen, GraduationCap, PenTool } from 'lucide-react';
+import { Volume2, VolumeX, History, FileText, Sparkles, BookOpen, GraduationCap, PenTool } from 'lucide-react';
 
 interface HeaderProps {
   currentTheme: Theme;
-  onSelectTheme: (theme: Theme) => void;
   soundType: SoundType;
   onChangeSound: (sound: SoundType) => void;
   onOpenHistory: () => void;
@@ -16,7 +14,6 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   currentTheme,
-  onSelectTheme,
   soundType,
   onChangeSound,
   onOpenHistory,
@@ -24,7 +21,6 @@ export const Header: React.FC<HeaderProps> = ({
   activeCategory,
   onSelectCategory,
 }) => {
-  const [showThemePicker, setShowThemePicker] = useState(false);
   const [showSoundPicker, setShowSoundPicker] = useState(false);
 
   return (
@@ -122,10 +118,7 @@ export const Header: React.FC<HeaderProps> = ({
         {/* Switch Sound Selector */}
         <div className="relative">
           <button
-            onClick={() => {
-              setShowSoundPicker(!showSoundPicker);
-              setShowThemePicker(false);
-            }}
+            onClick={() => setShowSoundPicker(!showSoundPicker)}
             title="Keyboard Key Sound"
             className="px-2.5 py-1.5 rounded-md text-xs transition-colors flex items-center gap-1.5 border"
             style={{ 
@@ -176,77 +169,19 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
 
-        {/* Theme Picker */}
-        <div className="relative">
-          <button
-            onClick={() => {
-              setShowThemePicker(!showThemePicker);
-              setShowSoundPicker(false);
-            }}
-            title="Color Palette"
-            className="px-2.5 py-1.5 rounded-md text-xs transition-colors flex items-center gap-1.5 border"
-            style={{ 
-              borderColor: currentTheme.border,
-              backgroundColor: currentTheme.bg,
-              color: currentTheme.textMain 
-            }}
-          >
-            <Palette className="w-3.5 h-3.5" style={{ color: currentTheme.primary }} />
-            <span className="hidden sm:inline text-[11px]">
-              {currentTheme.name}
-            </span>
-          </button>
-
-          {showThemePicker && (
-            <div 
-              className="absolute right-0 top-full mt-2 w-52 rounded-lg shadow-lg p-1.5 border z-50 grid grid-cols-1 gap-1 text-xs"
-              style={{ 
-                backgroundColor: currentTheme.surface, 
-                borderColor: currentTheme.border 
-              }}
-            >
-              <div className="font-semibold mb-1 px-2 py-1 text-[10px] uppercase tracking-wider text-slate-400">
-                Blue & White Palettes
-              </div>
-              {THEMES.map((theme) => (
-                <button
-                  key={theme.id}
-                  onClick={() => {
-                    onSelectTheme(theme);
-                    setShowThemePicker(false);
-                  }}
-                  className="w-full text-left px-2.5 py-1.5 rounded flex items-center justify-between transition-colors text-xs"
-                  style={{
-                    backgroundColor: currentTheme.id === theme.id ? `${theme.primary}15` : 'transparent',
-                    color: currentTheme.id === theme.id ? theme.primary : currentTheme.textMain,
-                  }}
-                >
-                  <div className="flex items-center gap-2">
-                    <span 
-                      className="w-3.5 h-3.5 rounded-full border border-slate-300"
-                      style={{ backgroundColor: theme.primary }} 
-                    />
-                    <span>{theme.name}</span>
-                  </div>
-                  {currentTheme.id === theme.id && <span className="text-[10px]">✓</span>}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
         {/* Past Records / History */}
         <button
           onClick={onOpenHistory}
           title="Past Tests & Band History"
-          className="p-2 rounded-md transition-colors border"
+          className="px-2.5 py-1.5 rounded-md transition-colors border text-xs flex items-center gap-1.5 hover:bg-white/10"
           style={{ 
             borderColor: currentTheme.border,
             backgroundColor: currentTheme.bg,
-            color: currentTheme.textMain 
+            color: '#ffffff' 
           }}
         >
-          <History className="w-3.5 h-3.5" />
+          <History className="w-3.5 h-3.5 text-sky-400" />
+          <span className="hidden sm:inline">Records</span>
         </button>
       </div>
     </header>

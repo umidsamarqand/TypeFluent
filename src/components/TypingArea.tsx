@@ -48,6 +48,8 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
   const activeWordRef = useRef<HTMLSpanElement>(null);
   const timerIntervalRef = useRef<number | null>(null);
 
+  const [errorKeysMap, setErrorKeysMap] = useState<Record<string, number>>({});
+
   // Reset test state
   const resetTest = useCallback(() => {
     if (timerIntervalRef.current) {
@@ -62,6 +64,7 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
     setElapsedSeconds(0);
     setKeystrokeLog({ correct: 0, incorrect: 0, extra: 0 });
     setWpmSnapshots([]);
+    setErrorKeysMap({});
     setTimeout(() => {
       inputRef.current?.focus();
     }, 50);
@@ -137,6 +140,8 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
       }
     }
 
+    const peakWpm = Math.max(netWpm, ...finalSnapshots.map((s) => s.wpm), 0);
+
     const finalStats: TestStats = {
       wpm: netWpm,
       rawWpm: Math.max(netWpm, rawWpm),
@@ -151,10 +156,12 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
       wpmHistory: finalSnapshots,
       completedWords: completedWordsCount,
       totalWords: targetWords.length,
+      peakWpm,
+      errorKeys: errorKeysMap,
     };
 
     onFinishTest(finalStats);
-  }, [isFinished, targetWords, currentWordIndex, currentInput, onFinishTest]);
+  }, [isFinished, targetWords, currentWordIndex, currentInput, onFinishTest, errorKeysMap]);
 
   // Master Timer loop when test is active
   useEffect(() => {
@@ -280,6 +287,14 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
 
       playKeySound(config.soundType, config.soundVolume, !isCorrect);
 
+      if (!isCorrect) {
+        const errKey = expectedChar || e.key;
+        setErrorKeysMap((prev) => ({
+          ...prev,
+          [errKey]: (prev[errKey] || 0) + 1,
+        }));
+      }
+
       setKeystrokeLog((prev) => ({
         correct: prev.correct + (isCorrect ? 1 : 0),
         incorrect: prev.incorrect + (!isCorrect ? 1 : 0),
@@ -357,8 +372,8 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
           {/* Left: Progress / Time status */}
           <div className="flex items-center gap-3">
             <div 
-              className="px-3 py-1 rounded-md font-mono-custom text-xs font-bold flex items-center gap-1.5"
-              style={{ backgroundColor: currentTheme.primary, color: '#ffffff' }}
+              className="px-3 py-1 rounded-md font-mono-custom text-xs font-bold flex items-center gap-1.5 shadow-xs"
+              style={{ backgroundColor: currentTheme.primary, color: '#0a1128' }}
             >
               {config.mode === 'time' ? (
                 <span>{Math.max(0, config.timeLimit - elapsedSeconds)}s remaining</span>
@@ -367,7 +382,7 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
               )}
             </div>
 
-            <div className="w-28 h-2 bg-slate-200 rounded-full overflow-hidden hidden sm:block">
+            <div className="w-28 h-2 bg-white/10 rounded-full overflow-hidden hidden sm:block">
               <div 
                 className="h-full transition-all duration-300 rounded-full"
                 style={{ 
@@ -535,25 +550,25 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
         >
           <button
             onClick={resetTest}
-            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-medium transition-colors hover:bg-slate-50"
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-medium transition-colors hover:bg-white/10"
             style={{ 
               borderColor: currentTheme.border,
-              backgroundColor: currentTheme.surface, 
-              color: currentTheme.textMain 
+              backgroundColor: currentTheme.bg, 
+              color: '#ffffff' 
             }}
           >
-            <RotateCcw className="w-3.5 h-3.5" />
+            <RotateCcw className="w-3.5 h-3.5 text-sky-400" />
             <span>Restart (Tab)</span>
           </button>
 
           <div className="flex items-center gap-4">
             <span className="hidden sm:inline text-[11px]" style={{ color: currentTheme.textMuted }}>
-              Press <kbd className="px-1.5 py-0.5 rounded border text-[10px] bg-slate-100">Space</kbd> after each word
+              Press <kbd className="px-1.5 py-0.5 rounded border text-[10px] bg-white/10 border-white/20 text-sky-300">Space</kbd> after each word
             </span>
 
             <button
               onClick={onNextArticle}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90 shadow-xs"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-bold text-slate-950 transition-opacity hover:opacity-90 shadow-xs"
               style={{ backgroundColor: currentTheme.primary }}
             >
               <span>Next Article</span>

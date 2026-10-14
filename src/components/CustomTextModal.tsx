@@ -121,8 +121,8 @@ export const CustomTextModal: React.FC<CustomTextModalProps> = ({
         {/* Header */}
         <div className="flex items-center justify-between border-b pb-3" style={{ borderColor: currentTheme.border }}>
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-amber-400" />
-            <span className="font-bold text-sm">Custom Article & AI Generator</span>
+            <Sparkles className="w-4 h-4 text-sky-400" />
+            <span className="font-bold text-sm text-white">Custom Article & AI Generator</span>
           </div>
           <button
             onClick={onClose}

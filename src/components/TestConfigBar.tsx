@@ -45,7 +45,7 @@ export const TestConfigBar: React.FC<TestConfigBarProps> = ({
               className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                 config.category === cat.id
                   ? 'shadow-xs font-semibold'
-                  : 'hover:bg-slate-50'
+                  : 'hover:bg-white/10'
               }`}
               style={{
                 backgroundColor: config.category === cat.id ? currentTheme.primary : 'transparent',

@@ -27,7 +27,7 @@ export const IELTSCard: React.FC<IELTSCardProps> = ({ currentTheme, article }) =
         <div className="flex items-center gap-3">
           <div 
             className="w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs shadow-xs"
-            style={{ backgroundColor: currentTheme.primary, color: '#ffffff' }}
+            style={{ backgroundColor: currentTheme.primary, color: '#0a1128' }}
           >
             {article.category === 'ielts-task1' ? 'T1' : 'T2'}
           </div>
