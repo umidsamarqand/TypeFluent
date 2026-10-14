@@ -1,0 +1,6 @@
+{
+  "name": "ArticleType - Monkeytype for Real Articles & IELTS",
+  "description": "A minimalist typing speed test inspired by Monkeytype, featuring authentic journalism, science essays, and IELTS Academic Writing Task 1 & 2 texts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
