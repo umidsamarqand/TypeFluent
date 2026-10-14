@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Theme, SoundType, ArticleCategory } from '../types';
 import { THEMES } from '../utils/themes';
-import { Volume2, VolumeX, Palette, History, FileText, Sparkles, BookOpen, GraduationCap } from 'lucide-react';
+import { Volume2, VolumeX, Palette, History, FileText, Sparkles, BookOpen, GraduationCap, PenTool } from 'lucide-react';
 
 interface HeaderProps {
   currentTheme: Theme;
@@ -29,34 +29,50 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header 
-      className="flex items-center justify-between gap-8 px-6 py-4 border-b transition-colors relative z-30"
+      className="flex items-center justify-between gap-8 px-6 lg:px-12 py-3.5 border-b transition-colors relative z-30 shadow-xs"
       style={{ 
         borderColor: currentTheme.border, 
         backgroundColor: currentTheme.surface 
       }}
     >
-      {/* Zone 1: Single text element wordmark */}
+      {/* Zone 1: Clean Distinctive Brand Lockup */}
       <div className="flex items-center gap-3 shrink-0">
         <a 
           href="/" 
-          className="text-lg font-bold tracking-tight whitespace-nowrap shrink-0 flex items-center gap-2"
-          style={{ color: currentTheme.primary }}
+          className="text-base font-bold tracking-tight whitespace-nowrap shrink-0 flex items-center gap-2.5"
+          style={{ color: currentTheme.textMain }}
         >
-          <span className="text-xl">⌨</span>
-          <span className="font-mono-custom tracking-wider">articletype</span>
+          <div 
+            className="w-8 h-8 rounded-lg flex items-center justify-center shadow-xs"
+            style={{ backgroundColor: currentTheme.primary, color: '#ffffff' }}
+          >
+            <PenTool className="w-4 h-4" />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-semibold text-sm leading-tight tracking-tight">ArticleType</span>
+            <span className="text-[10px] font-normal leading-none" style={{ color: currentTheme.primary }}>
+              Academic & Article Practice
+            </span>
+          </div>
         </a>
       </div>
 
-      {/* Zone 2: 4–5 clean single-line navigation category links */}
-      <nav className="hidden md:flex items-center gap-6 text-xs font-medium">
+      {/* Zone 2: Navigation Links */}
+      <nav className="hidden md:flex items-center gap-8 text-xs font-medium">
         <button
           onClick={() => onSelectCategory('all')}
-          className={`flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 pb-0.5 border-b-2 ${
-            activeCategory === 'all' ? 'font-semibold' : 'opacity-70 hover:opacity-100'
+          className={`flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 pb-1 border-b-2 ${
+            activeCategory === 'all' || activeCategory === 'science' || activeCategory === 'tech' || activeCategory === 'nature' || activeCategory === 'literature'
+              ? 'font-semibold' 
+              : 'opacity-70 hover:opacity-100'
           }`}
           style={{
-            color: activeCategory === 'all' ? currentTheme.primary : currentTheme.textMain,
-            borderColor: activeCategory === 'all' ? currentTheme.primary : 'transparent',
+            color: (activeCategory === 'all' || activeCategory === 'science' || activeCategory === 'tech' || activeCategory === 'nature' || activeCategory === 'literature') 
+              ? currentTheme.primary 
+              : currentTheme.textMuted,
+            borderColor: (activeCategory === 'all' || activeCategory === 'science' || activeCategory === 'tech' || activeCategory === 'nature' || activeCategory === 'literature') 
+              ? currentTheme.primary 
+              : 'transparent',
           }}
         >
           <BookOpen className="w-3.5 h-3.5" />
@@ -65,11 +81,11 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={() => onSelectCategory('ielts-task1')}
-          className={`flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 pb-0.5 border-b-2 ${
+          className={`flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 pb-1 border-b-2 ${
             activeCategory === 'ielts-task1' ? 'font-semibold' : 'opacity-70 hover:opacity-100'
           }`}
           style={{
-            color: activeCategory === 'ielts-task1' ? currentTheme.primary : currentTheme.textMain,
+            color: activeCategory === 'ielts-task1' ? currentTheme.primary : currentTheme.textMuted,
             borderColor: activeCategory === 'ielts-task1' ? currentTheme.primary : 'transparent',
           }}
         >
@@ -79,11 +95,11 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={() => onSelectCategory('ielts-task2')}
-          className={`flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 pb-0.5 border-b-2 ${
+          className={`flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 pb-1 border-b-2 ${
             activeCategory === 'ielts-task2' ? 'font-semibold' : 'opacity-70 hover:opacity-100'
           }`}
           style={{
-            color: activeCategory === 'ielts-task2' ? currentTheme.primary : currentTheme.textMain,
+            color: activeCategory === 'ielts-task2' ? currentTheme.primary : currentTheme.textMuted,
             borderColor: activeCategory === 'ielts-task2' ? currentTheme.primary : 'transparent',
           }}
         >
@@ -93,47 +109,51 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={onOpenCustomText}
-          className="flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 opacity-70 hover:opacity-100 pb-0.5 border-b-2 border-transparent"
-          style={{ color: currentTheme.textMain }}
+          className="flex items-center gap-1.5 transition-colors whitespace-nowrap shrink-0 opacity-70 hover:opacity-100 pb-1 border-b-2 border-transparent"
+          style={{ color: currentTheme.textMuted }}
         >
-          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-          <span>Custom / AI Topic</span>
+          <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+          <span>Generate / Paste</span>
         </button>
       </nav>
 
-      {/* Zone 3: Clean action buttons */}
-      <div className="flex items-center gap-3 shrink-0">
-        {/* Sound Selector */}
+      {/* Zone 3: Clean Actions */}
+      <div className="flex items-center gap-2 shrink-0">
+        {/* Switch Sound Selector */}
         <div className="relative">
           <button
             onClick={() => {
               setShowSoundPicker(!showSoundPicker);
               setShowThemePicker(false);
             }}
-            title="Keyboard Switch Sound"
-            className="p-1.5 rounded text-xs transition-opacity flex items-center gap-1.5 hover:opacity-100 opacity-80"
-            style={{ color: currentTheme.textMuted }}
+            title="Keyboard Key Sound"
+            className="px-2.5 py-1.5 rounded-md text-xs transition-colors flex items-center gap-1.5 border"
+            style={{ 
+              borderColor: currentTheme.border,
+              backgroundColor: currentTheme.bg,
+              color: currentTheme.textMain 
+            }}
           >
             {soundType === 'off' ? (
-              <VolumeX className="w-4 h-4" />
+              <VolumeX className="w-3.5 h-3.5 opacity-60" />
             ) : (
-              <Volume2 className="w-4 h-4" style={{ color: currentTheme.primary }} />
+              <Volume2 className="w-3.5 h-3.5" style={{ color: currentTheme.primary }} />
             )}
-            <span className="hidden sm:inline font-mono-custom text-[11px] capitalize">
-              {soundType.replace('_', ' ')}
+            <span className="hidden sm:inline text-[11px] capitalize">
+              {soundType === 'off' ? 'Mute' : soundType.replace('_', ' ')}
             </span>
           </button>
 
           {showSoundPicker && (
             <div 
-              className="absolute right-0 top-full mt-2 w-44 rounded-lg shadow-xl p-2 border z-50 text-xs"
+              className="absolute right-0 top-full mt-2 w-44 rounded-lg shadow-lg p-1.5 border z-50 text-xs"
               style={{ 
                 backgroundColor: currentTheme.surface, 
                 borderColor: currentTheme.border 
               }}
             >
-              <div className="font-semibold mb-1.5 px-2 text-[11px] uppercase tracking-wider" style={{ color: currentTheme.textMuted }}>
-                Switch Sound
+              <div className="font-semibold mb-1 px-2 py-1 text-[10px] uppercase tracking-wider text-slate-400">
+                Switch Audio
               </div>
               {(['off', 'clicky', 'thock', 'box_navy', 'bubble'] as SoundType[]).map((type) => (
                 <button
@@ -142,14 +162,14 @@ export const Header: React.FC<HeaderProps> = ({
                     onChangeSound(type);
                     setShowSoundPicker(false);
                   }}
-                  className="w-full text-left px-2 py-1.5 rounded flex items-center justify-between capitalize transition-colors"
+                  className="w-full text-left px-2.5 py-1.5 rounded flex items-center justify-between capitalize transition-colors text-xs"
                   style={{
-                    backgroundColor: soundType === type ? currentTheme.bg : 'transparent',
+                    backgroundColor: soundType === type ? `${currentTheme.primary}15` : 'transparent',
                     color: soundType === type ? currentTheme.primary : currentTheme.textMain,
                   }}
                 >
                   <span>{type === 'box_navy' ? 'Box Navy (Heavy)' : type}</span>
-                  {soundType === type && <span className="text-[10px]">●</span>}
+                  {soundType === type && <span className="text-[10px]">✓</span>}
                 </button>
               ))}
             </div>
@@ -163,26 +183,30 @@ export const Header: React.FC<HeaderProps> = ({
               setShowThemePicker(!showThemePicker);
               setShowSoundPicker(false);
             }}
-            title="Color Theme"
-            className="p-1.5 rounded text-xs transition-opacity flex items-center gap-1.5 hover:opacity-100 opacity-80"
-            style={{ color: currentTheme.textMuted }}
+            title="Color Palette"
+            className="px-2.5 py-1.5 rounded-md text-xs transition-colors flex items-center gap-1.5 border"
+            style={{ 
+              borderColor: currentTheme.border,
+              backgroundColor: currentTheme.bg,
+              color: currentTheme.textMain 
+            }}
           >
-            <Palette className="w-4 h-4" style={{ color: currentTheme.primary }} />
-            <span className="hidden sm:inline font-mono-custom text-[11px]">
+            <Palette className="w-3.5 h-3.5" style={{ color: currentTheme.primary }} />
+            <span className="hidden sm:inline text-[11px]">
               {currentTheme.name}
             </span>
           </button>
 
           {showThemePicker && (
             <div 
-              className="absolute right-0 top-full mt-2 w-52 rounded-lg shadow-xl p-2 border z-50 grid grid-cols-1 gap-1 text-xs"
+              className="absolute right-0 top-full mt-2 w-52 rounded-lg shadow-lg p-1.5 border z-50 grid grid-cols-1 gap-1 text-xs"
               style={{ 
                 backgroundColor: currentTheme.surface, 
                 borderColor: currentTheme.border 
               }}
             >
-              <div className="font-semibold mb-1 px-2 text-[11px] uppercase tracking-wider" style={{ color: currentTheme.textMuted }}>
-                Themes
+              <div className="font-semibold mb-1 px-2 py-1 text-[10px] uppercase tracking-wider text-slate-400">
+                Blue & White Palettes
               </div>
               {THEMES.map((theme) => (
                 <button
@@ -191,34 +215,38 @@ export const Header: React.FC<HeaderProps> = ({
                     onSelectTheme(theme);
                     setShowThemePicker(false);
                   }}
-                  className="w-full text-left px-2 py-1.5 rounded flex items-center justify-between transition-colors"
+                  className="w-full text-left px-2.5 py-1.5 rounded flex items-center justify-between transition-colors text-xs"
                   style={{
-                    backgroundColor: currentTheme.id === theme.id ? currentTheme.bg : 'transparent',
-                    color: currentTheme.id === theme.id ? currentTheme.primary : currentTheme.textMain,
+                    backgroundColor: currentTheme.id === theme.id ? `${theme.primary}15` : 'transparent',
+                    color: currentTheme.id === theme.id ? theme.primary : currentTheme.textMain,
                   }}
                 >
                   <div className="flex items-center gap-2">
                     <span 
-                      className="w-3 h-3 rounded-full border border-black/20"
+                      className="w-3.5 h-3.5 rounded-full border border-slate-300"
                       style={{ backgroundColor: theme.primary }} 
                     />
                     <span>{theme.name}</span>
                   </div>
-                  {currentTheme.id === theme.id && <span className="text-[10px]">●</span>}
+                  {currentTheme.id === theme.id && <span className="text-[10px]">✓</span>}
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* History Stats Button */}
+        {/* Past Records / History */}
         <button
           onClick={onOpenHistory}
-          title="Past Results & Stats"
-          className="p-1.5 rounded text-xs transition-opacity flex items-center gap-1 hover:opacity-100 opacity-80"
-          style={{ color: currentTheme.textMuted }}
+          title="Past Tests & Band History"
+          className="p-2 rounded-md transition-colors border"
+          style={{ 
+            borderColor: currentTheme.border,
+            backgroundColor: currentTheme.bg,
+            color: currentTheme.textMain 
+          }}
         >
-          <History className="w-4 h-4" />
+          <History className="w-3.5 h-3.5" />
         </button>
       </div>
     </header>

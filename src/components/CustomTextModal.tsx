@@ -231,8 +231,8 @@ export const CustomTextModal: React.FC<CustomTextModalProps> = ({
               <button
                 type="submit"
                 disabled={!customText.trim()}
-                className="px-4 py-2 rounded-lg font-semibold transition-opacity disabled:opacity-40"
-                style={{ backgroundColor: currentTheme.primary, color: currentTheme.bg }}
+                className="px-4 py-2 rounded-lg font-semibold text-white transition-opacity disabled:opacity-40 shadow-xs"
+                style={{ backgroundColor: currentTheme.primary }}
               >
                 Load Article into Test
               </button>
@@ -320,8 +320,8 @@ export const CustomTextModal: React.FC<CustomTextModalProps> = ({
                 type="button"
                 onClick={handleGenerateAI}
                 disabled={!aiTopic.trim() || isGenerating}
-                className="flex items-center gap-2 px-5 py-2 rounded-lg font-semibold transition-opacity disabled:opacity-40"
-                style={{ backgroundColor: currentTheme.primary, color: currentTheme.bg }}
+                className="flex items-center gap-2 px-5 py-2 rounded-lg font-semibold text-white transition-opacity disabled:opacity-40 shadow-xs"
+                style={{ backgroundColor: currentTheme.primary }}
               >
                 {isGenerating && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
                 <span>{isGenerating ? 'Generating Text...' : 'Generate & Practice'}</span>

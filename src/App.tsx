@@ -235,21 +235,27 @@ export default function App() {
         )}
       </main>
 
-      {/* Footer: Quiet copyright and shortcuts */}
+      {/* Footer: Quiet information and keyboard guidance */}
       <footer 
         className="py-4 px-6 border-t flex flex-wrap items-center justify-between gap-4 text-xs font-mono-custom transition-colors"
-        style={{ borderColor: currentTheme.border, color: currentTheme.textMuted }}
+        style={{ 
+          borderColor: currentTheme.border, 
+          backgroundColor: currentTheme.surface,
+          color: currentTheme.textMuted 
+        }}
       >
-        <div className="flex items-center gap-4">
-          <span>tab to restart</span>
+        <div className="flex items-center gap-3">
+          <span><kbd className="px-1.5 py-0.5 rounded border text-[10px] bg-slate-100">Tab</kbd> restart</span>
           <span aria-hidden="true">·</span>
-          <span>esc to reset</span>
+          <span><kbd className="px-1.5 py-0.5 rounded border text-[10px] bg-slate-100">Space</kbd> submit word</span>
           <span aria-hidden="true">·</span>
-          <span>space to advance word</span>
+          <span><kbd className="px-1.5 py-0.5 rounded border text-[10px] bg-slate-100">Ctrl+Bksp</kbd> clear word</span>
         </div>
 
-        <div className="flex items-center gap-4">
-          <span>ArticleType · Real Articles & IELTS Simulation</span>
+        <div className="flex items-center gap-2">
+          <span className="font-medium text-slate-700">ArticleType</span>
+          <span aria-hidden="true">·</span>
+          <span>Academic & Journalistic Typing Studio</span>
         </div>
       </footer>
 

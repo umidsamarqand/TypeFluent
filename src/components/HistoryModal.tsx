@@ -104,8 +104,8 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
               </thead>
               <tbody className="divide-y" style={{ borderColor: currentTheme.border }}>
                 {history.map((item) => (
-                  <tr key={item.id} className="hover:bg-white/5 transition-colors">
-                    <td className="py-2 px-3 font-medium truncate max-w-[200px]" style={{ color: currentTheme.textMain }}>
+                  <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="py-2.5 px-3 font-medium truncate max-w-[200px]" style={{ color: currentTheme.textMain }}>
                       {item.articleTitle}
                     </td>
                     <td className="py-2 px-3 opacity-70">

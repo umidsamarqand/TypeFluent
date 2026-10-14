@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { Theme, TestConfig, Article, TestStats, WpmPoint } from '../types';
 import { playKeySound } from '../utils/audio';
-import { RotateCcw, AlertTriangle } from 'lucide-react';
+import { RotateCcw, AlertTriangle, ArrowRight, Gauge, CheckCircle2 } from 'lucide-react';
 
 interface TypingAreaProps {
   currentTheme: Theme;
@@ -114,7 +114,7 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
       }
     }
 
-    // Account for spaces between correct words
+    // Account for spaces between completed words
     const completedWordsCount = finalTypedHistory.length;
     correctChars += Math.max(0, completedWordsCount);
 
@@ -124,8 +124,8 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
     const totalKeystrokes = finalKeystrokes.correct + finalKeystrokes.incorrect + finalKeystrokes.extra;
     const accuracy = totalKeystrokes > 0 ? Math.round((finalKeystrokes.correct / totalKeystrokes) * 100) : 100;
 
-    // Consistency formula: calculate standard deviation of WPM samples
-    let consistency = 85;
+    // Consistency formula
+    let consistency = 88;
     if (finalSnapshots.length > 2) {
       const speeds = finalSnapshots.map((s) => s.wpm);
       const mean = speeds.reduce((a, b) => a + b, 0) / speeds.length;
@@ -166,7 +166,6 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
 
         // Snapshot current WPM for graph
         const currentMins = next / 60;
-        // Estimate correct chars so far
         let cChars = keystrokeLog.correct;
         const currentNetWpm = Math.round((cChars / 5) / currentMins);
         const currentRawWpm = Math.round(((keystrokeLog.correct + keystrokeLog.incorrect + keystrokeLog.extra) / 5) / currentMins);
@@ -209,10 +208,9 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
 
   // Input keystroke handler
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Check Caps Lock state
     setCapsLockOn(e.getModifierState('CapsLock'));
 
-    // Instant restart shortcut: Tab + Enter or Escape
+    // Instant restart shortcut: Tab
     if (e.key === 'Tab') {
       e.preventDefault();
       resetTest();
@@ -231,7 +229,7 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
     // Handle Space: submit current word
     if (e.key === ' ') {
       e.preventDefault();
-      if (currentInput.length === 0) return; // ignore leading duplicate spaces
+      if (currentInput.length === 0) return;
 
       const isExactMatch = currentInput === currentTargetWord;
       playKeySound(config.soundType, config.soundVolume, !isExactMatch);
@@ -239,7 +237,6 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
       const nextTypedHistory = [...typedHistory, currentInput];
       setTypedHistory(nextTypedHistory);
 
-      // Check if finished by words or full mode
       const nextWordIndex = currentWordIndex + 1;
       if (nextWordIndex >= targetWords.length) {
         finalizeTest(Math.max(1, elapsedSeconds), nextTypedHistory, keystrokeLog, wpmSnapshots);
@@ -254,18 +251,15 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
     // Handle Backspace
     if (e.key === 'Backspace') {
       if (e.ctrlKey || e.altKey) {
-        // Clear entire current word
         e.preventDefault();
         setCurrentInput('');
         return;
       }
 
       if (currentInput.length > 0) {
-        // Backspace inside current word
         playKeySound(config.soundType, config.soundVolume);
         setCurrentInput((prev) => prev.slice(0, -1));
       } else if (currentWordIndex > 0) {
-        // Backspace into previous word!
         e.preventDefault();
         const prevWordIdx = currentWordIndex - 1;
         const prevTyped = typedHistory[prevWordIdx] || '';
@@ -295,7 +289,6 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
       const nextInput = currentInput + e.key;
       setCurrentInput(nextInput);
 
-      // Check if last character of the last word was typed correctly
       if (
         currentWordIndex === targetWords.length - 1 &&
         nextInput === currentTargetWord
@@ -307,25 +300,20 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
     }
   };
 
-  // Live timer or words remaining counter
-  const counterDisplay = useMemo(() => {
+  // Progress percentage calculation
+  const progressPercent = useMemo(() => {
     if (config.mode === 'time') {
-      const remaining = Math.max(0, config.timeLimit - elapsedSeconds);
-      return `${remaining}s`;
+      return Math.min(100, Math.round((elapsedSeconds / config.timeLimit) * 100));
     }
-    if (config.mode === 'words') {
-      const wordsRemaining = Math.max(0, config.wordLimit - currentWordIndex);
-      return `${currentWordIndex}/${config.wordLimit}`;
-    }
-    return `${currentWordIndex}/${targetWords.length}`;
-  }, [config.mode, config.timeLimit, config.wordLimit, elapsedSeconds, currentWordIndex, targetWords.length]);
+    return Math.min(100, Math.round((currentWordIndex / targetWords.length) * 100));
+  }, [config.mode, config.timeLimit, elapsedSeconds, currentWordIndex, targetWords.length]);
 
   return (
     <div 
-      className="w-full max-w-5xl mx-auto flex flex-col items-center select-none outline-none relative py-4"
+      className="w-full flex flex-col items-center select-none outline-none relative"
       onClick={() => inputRef.current?.focus()}
     >
-      {/* Hidden native input to capture keyboard events effortlessly on desktop & mobile */}
+      {/* Hidden native input */}
       <input
         ref={inputRef}
         type="text"
@@ -336,201 +324,242 @@ export const TypingArea: React.FC<TypingAreaProps> = ({
         className="opacity-0 absolute -z-50 pointer-events-none"
         onKeyDown={handleKeyDown}
         onKeyUp={(e) => setCapsLockOn(e.getModifierState('CapsLock'))}
-        onChange={() => {}} // Controlled via onKeyDown
+        onChange={() => {}}
       />
 
       {/* Floating Caps Lock Warning Banner */}
       {capsLockOn && (
         <div 
-          className="mb-3 px-3 py-1 rounded-md text-xs font-mono-custom flex items-center gap-1.5 shadow-sm animate-pulse"
+          className="mb-3 px-3 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 shadow-sm"
           style={{ backgroundColor: currentTheme.error, color: '#ffffff' }}
         >
           <AlertTriangle className="w-3.5 h-3.5" />
-          <span>CAPS LOCK IS ON</span>
+          <span>CAPS LOCK IS ACTIVE</span>
         </div>
       )}
 
-      {/* Live Counter & Subtle Telemetry */}
-      <div className="w-full flex items-center justify-between px-2 mb-3 text-sm font-mono-custom">
-        <div 
-          className="text-2xl font-bold tabular-nums transition-colors"
-          style={{ color: isStarted ? currentTheme.primary : currentTheme.textMuted }}
-        >
-          {counterDisplay}
-        </div>
-
-        <div className="flex items-center gap-4 text-xs" style={{ color: currentTheme.textMuted }}>
-          {isStarted && (
-            <div className="flex items-center gap-3">
-              <span>
-                raw:{' '}
-                <strong className="tabular-nums" style={{ color: currentTheme.textMain }}>
-                  {elapsedSeconds > 0
-                    ? Math.round(((keystrokeLog.correct + keystrokeLog.incorrect) / 5) / (elapsedSeconds / 60))
-                    : 0}
-                </strong>
-              </span>
-              <span>
-                acc:{' '}
-                <strong className="tabular-nums" style={{ color: currentTheme.textMain }}>
-                  {keystrokeLog.correct + keystrokeLog.incorrect > 0
-                    ? Math.round((keystrokeLog.correct / (keystrokeLog.correct + keystrokeLog.incorrect)) * 100)
-                    : 100}%
-                </strong>
-              </span>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* The Text Display Viewport */}
-      <div
-        ref={containerRef}
-        className="w-full max-h-[260px] overflow-hidden no-scrollbar text-xl sm:text-2xl leading-relaxed tracking-normal font-mono-custom transition-all p-4 rounded-xl cursor-text relative"
+      {/* Modern White Typing Card */}
+      <div 
+        className="w-full rounded-2xl border shadow-sm transition-all overflow-hidden flex flex-col"
         style={{
           backgroundColor: currentTheme.surface,
-          border: `1px solid ${currentTheme.border}`,
+          borderColor: currentTheme.border,
         }}
       >
-        <div className="flex flex-wrap gap-x-2.5 gap-y-2">
-          {targetWords.map((word, wIdx) => {
-            const isCurrent = wIdx === currentWordIndex;
-            const isCompleted = wIdx < currentWordIndex;
-            const typedWord = typedHistory[wIdx];
-
-            // Render Previous Completed Words
-            if (isCompleted && typedWord !== undefined) {
-              const hasMistake = typedWord !== word;
-              return (
-                <span
-                  key={wIdx}
-                  className={`inline-block transition-colors ${
-                    hasMistake ? 'border-b-2' : ''
-                  }`}
-                  style={{
-                    borderColor: hasMistake ? currentTheme.error : 'transparent',
-                  }}
-                >
-                  {word.split('').map((char, cIdx) => {
-                    const typedChar = typedWord[cIdx];
-                    let charColor = currentTheme.textMain;
-
-                    if (!config.blindMode) {
-                      if (typedChar === undefined) {
-                        charColor = currentTheme.error; // missed char
-                      } else if (typedChar !== char) {
-                        charColor = currentTheme.error;
-                      }
-                    }
-
-                    return (
-                      <span key={cIdx} style={{ color: charColor }}>
-                        {char}
-                      </span>
-                    );
-                  })}
-                  {/* Extra letters if typed past word length */}
-                  {!config.blindMode && typedWord.length > word.length && (
-                    <span style={{ color: currentTheme.errorExtra }}>
-                      {typedWord.slice(word.length)}
-                    </span>
-                  )}
-                </span>
-              );
-            }
-
-            // Render Active Word
-            if (isCurrent) {
-              return (
-                <span
-                  key={wIdx}
-                  ref={activeWordRef}
-                  className="inline-block relative rounded px-0.5"
-                >
-                  {word.split('').map((char, cIdx) => {
-                    const typedChar = currentInput[cIdx];
-                    const isTyped = cIdx < currentInput.length;
-                    const isCorrect = isTyped && typedChar === char;
-                    const isCurrentCaretChar = cIdx === currentInput.length;
-
-                    let charColor = currentTheme.textMuted;
-                    if (isTyped) {
-                      if (config.blindMode) {
-                        charColor = currentTheme.textMain;
-                      } else {
-                        charColor = isCorrect ? currentTheme.textMain : currentTheme.error;
-                      }
-                    }
-
-                    return (
-                      <span key={cIdx} className="relative">
-                        {/* Caret before character */}
-                        {isCurrentCaretChar && (
-                          <span
-                            className="absolute -left-[1px] top-0 bottom-0 w-[2.5px] rounded-full animate-caret"
-                            style={{ backgroundColor: currentTheme.caret }}
-                          />
-                        )}
-                        <span style={{ color: charColor }}>{char}</span>
-                      </span>
-                    );
-                  })}
-
-                  {/* Extra letters typed on active word */}
-                  {currentInput.length > word.length && (
-                    <span style={{ color: currentTheme.errorExtra }}>
-                      {currentInput.slice(word.length)}
-                    </span>
-                  )}
-
-                  {/* Caret at the end of word if typing extra letters */}
-                  {currentInput.length >= word.length && (
-                    <span
-                      className="inline-block w-[2.5px] h-6 -mb-1 rounded-full animate-caret ml-[1px]"
-                      style={{ backgroundColor: currentTheme.caret }}
-                    />
-                  )}
-                </span>
-              );
-            }
-
-            // Render Future Untyped Words
-            return (
-              <span key={wIdx} className="inline-block" style={{ color: currentTheme.textMuted }}>
-                {word}
-              </span>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Control bar below text: Restart button and Tab + Enter hint */}
-      <div className="flex items-center justify-between w-full mt-5 px-2 text-xs font-mono-custom" style={{ color: currentTheme.textMuted }}>
-        <button
-          onClick={resetTest}
-          title="Restart Test (Tab)"
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded transition-all hover:opacity-100 opacity-70"
+        {/* Top Header Strip inside Card */}
+        <div 
+          className="px-6 py-3.5 border-b flex items-center justify-between text-xs transition-colors"
           style={{ 
-            backgroundColor: currentTheme.surface, 
-            color: currentTheme.textMain,
-            border: `1px solid ${currentTheme.border}`
+            borderColor: currentTheme.border,
+            backgroundColor: `${currentTheme.primary}08`
           }}
         >
-          <RotateCcw className="w-3.5 h-3.5" />
-          <span>restart</span>
-        </button>
+          {/* Left: Progress / Time status */}
+          <div className="flex items-center gap-3">
+            <div 
+              className="px-3 py-1 rounded-md font-mono-custom text-xs font-bold flex items-center gap-1.5"
+              style={{ backgroundColor: currentTheme.primary, color: '#ffffff' }}
+            >
+              {config.mode === 'time' ? (
+                <span>{Math.max(0, config.timeLimit - elapsedSeconds)}s remaining</span>
+              ) : (
+                <span>Word {currentWordIndex + 1} of {targetWords.length}</span>
+              )}
+            </div>
 
-        <div className="flex items-center gap-3">
-          <span className="hidden sm:inline opacity-70">
-            <kbd className="px-1.5 py-0.5 rounded text-[11px] bg-black/20 border border-white/10">tab</kbd> to restart
-          </span>
+            <div className="w-28 h-2 bg-slate-200 rounded-full overflow-hidden hidden sm:block">
+              <div 
+                className="h-full transition-all duration-300 rounded-full"
+                style={{ 
+                  width: `${progressPercent}%`,
+                  backgroundColor: currentTheme.primary 
+                }}
+              />
+            </div>
+          </div>
+
+          {/* Right: Live Telemetry */}
+          <div className="flex items-center gap-4 font-mono-custom text-xs">
+            {isStarted ? (
+              <>
+                <div className="flex items-center gap-1.5">
+                  <Gauge className="w-3.5 h-3.5 text-blue-500" />
+                  <span style={{ color: currentTheme.textMuted }}>Speed:</span>
+                  <span className="font-bold tabular-nums" style={{ color: currentTheme.textMain }}>
+                    {elapsedSeconds > 0
+                      ? Math.round(((keystrokeLog.correct + keystrokeLog.incorrect) / 5) / (elapsedSeconds / 60))
+                      : 0} WPM
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-1.5">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                  <span style={{ color: currentTheme.textMuted }}>Acc:</span>
+                  <span className="font-bold tabular-nums" style={{ color: currentTheme.textMain }}>
+                    {keystrokeLog.correct + keystrokeLog.incorrect > 0
+                      ? Math.round((keystrokeLog.correct / (keystrokeLog.correct + keystrokeLog.incorrect)) * 100)
+                      : 100}%
+                  </span>
+                </div>
+              </>
+            ) : (
+              <span className="text-slate-400 font-sans text-[11px]">
+                Click here and begin typing to start test
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Text Area Body */}
+        <div
+          ref={containerRef}
+          className="w-full max-h-[290px] overflow-hidden no-scrollbar text-xl sm:text-2xl leading-relaxed tracking-normal font-mono-custom p-6 sm:p-8 cursor-text relative"
+        >
+          <div className="flex flex-wrap gap-x-2.5 gap-y-3">
+            {targetWords.map((word, wIdx) => {
+              const isCurrent = wIdx === currentWordIndex;
+              const isCompleted = wIdx < currentWordIndex;
+              const typedWord = typedHistory[wIdx];
+
+              // Previous Completed Words
+              if (isCompleted && typedWord !== undefined) {
+                const hasMistake = typedWord !== word;
+                return (
+                  <span
+                    key={wIdx}
+                    className={`inline-block transition-colors ${
+                      hasMistake ? 'border-b-2' : ''
+                    }`}
+                    style={{
+                      borderColor: hasMistake ? currentTheme.error : 'transparent',
+                    }}
+                  >
+                    {word.split('').map((char, cIdx) => {
+                      const typedChar = typedWord[cIdx];
+                      let charColor = currentTheme.textMain;
+
+                      if (!config.blindMode) {
+                        if (typedChar === undefined || typedChar !== char) {
+                          charColor = currentTheme.error;
+                        }
+                      }
+
+                      return (
+                        <span key={cIdx} style={{ color: charColor }}>
+                          {char}
+                        </span>
+                      );
+                    })}
+                    {!config.blindMode && typedWord.length > word.length && (
+                      <span style={{ color: currentTheme.errorExtra }}>
+                        {typedWord.slice(word.length)}
+                      </span>
+                    )}
+                  </span>
+                );
+              }
+
+              // Active Word
+              if (isCurrent) {
+                return (
+                  <span
+                    key={wIdx}
+                    ref={activeWordRef}
+                    className="inline-block relative rounded px-1 py-0.5"
+                    style={{
+                      backgroundColor: `${currentTheme.primary}12`,
+                    }}
+                  >
+                    {word.split('').map((char, cIdx) => {
+                      const typedChar = currentInput[cIdx];
+                      const isTyped = cIdx < currentInput.length;
+                      const isCorrect = isTyped && typedChar === char;
+                      const isCurrentCaretChar = cIdx === currentInput.length;
+
+                      let charColor = currentTheme.textMuted;
+                      if (isTyped) {
+                        if (config.blindMode) {
+                          charColor = currentTheme.textMain;
+                        } else {
+                          charColor = isCorrect ? currentTheme.textMain : currentTheme.error;
+                        }
+                      }
+
+                      return (
+                        <span key={cIdx} className="relative">
+                          {isCurrentCaretChar && (
+                            <span
+                              className="absolute -left-[1.5px] top-0 bottom-0 w-[3px] rounded-full animate-caret shadow-xs"
+                              style={{ backgroundColor: currentTheme.caret }}
+                            />
+                          )}
+                          <span style={{ color: charColor }}>{char}</span>
+                        </span>
+                      );
+                    })}
+
+                    {currentInput.length > word.length && (
+                      <span style={{ color: currentTheme.errorExtra }}>
+                        {currentInput.slice(word.length)}
+                      </span>
+                    )}
+
+                    {currentInput.length >= word.length && (
+                      <span
+                        className="inline-block w-[3px] h-6 -mb-1 rounded-full animate-caret ml-[1px]"
+                        style={{ backgroundColor: currentTheme.caret }}
+                      />
+                    )}
+                  </span>
+                );
+              }
+
+              // Future Words
+              return (
+                <span 
+                  key={wIdx} 
+                  className="inline-block opacity-60" 
+                  style={{ color: currentTheme.textMuted }}
+                >
+                  {word}
+                </span>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Card Footer Bar */}
+        <div 
+          className="px-6 py-3 border-t flex items-center justify-between text-xs"
+          style={{ borderColor: currentTheme.border }}
+        >
           <button
-            onClick={onNextArticle}
-            className="hover:underline transition-opacity opacity-75 hover:opacity-100"
-            style={{ color: currentTheme.primary }}
+            onClick={resetTest}
+            className="flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-xs font-medium transition-colors hover:bg-slate-50"
+            style={{ 
+              borderColor: currentTheme.border,
+              backgroundColor: currentTheme.surface, 
+              color: currentTheme.textMain 
+            }}
           >
-            next article →
+            <RotateCcw className="w-3.5 h-3.5" />
+            <span>Restart (Tab)</span>
           </button>
+
+          <div className="flex items-center gap-4">
+            <span className="hidden sm:inline text-[11px]" style={{ color: currentTheme.textMuted }}>
+              Press <kbd className="px-1.5 py-0.5 rounded border text-[10px] bg-slate-100">Space</kbd> after each word
+            </span>
+
+            <button
+              onClick={onNextArticle}
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-semibold text-white transition-opacity hover:opacity-90 shadow-xs"
+              style={{ backgroundColor: currentTheme.primary }}
+            >
+              <span>Next Article</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
